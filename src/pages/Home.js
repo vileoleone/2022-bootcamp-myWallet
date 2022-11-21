@@ -25,8 +25,8 @@ export default function Home() {
 
         axios.post(`http://localhost:5000/sign-in`, form)
             .then((resp) => {
-                setToken(resp.data.token)
-                setName(resp.data.name)
+                setToken(resp.data[0].token)
+                setName(resp.data[0].name)
                 navigate("/MainPage")
             })
             .catch((resp) => {
