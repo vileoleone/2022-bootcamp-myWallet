@@ -5,8 +5,9 @@ import { AiOutlinePlusCircle, AiOutlineMinusCircle } from "react-icons/ai"
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/Auth";
+
 export default function MainPage() {
-    const { token } = useContext(AuthContext)
+    const { token, name } = useContext(AuthContext)
     const [balanceArray, setBalanceArray] = useState([])
     const [total, setTotal] = useState(0)
     const config = {
@@ -48,7 +49,7 @@ export default function MainPage() {
         return (
             <BackgroundStyle>
                 <Header>
-                    <h1>Olá, Fulano</h1>
+                    <h1>Olá, {name}</h1>
                     <Link to="/">
                         <ArrowIcon />
                     </Link>
@@ -78,7 +79,7 @@ export default function MainPage() {
         return (
             <BackgroundStyle>
                 <Header>
-                    <h1>Olá, Fulano</h1>
+                    <h1>Olá, {name}</h1>
                     <Link to="/">
                         <ArrowIcon />
                     </Link>

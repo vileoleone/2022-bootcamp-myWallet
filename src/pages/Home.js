@@ -11,7 +11,7 @@ export default function Home() {
             email: "",
             password: ""
         })
-    let { setToken } = useContext(AuthContext)
+    let { setToken, setName } = useContext(AuthContext)
 
 
     function handleForm(e) {
@@ -25,7 +25,8 @@ export default function Home() {
 
         axios.post(`http://localhost:5000/sign-in`, form)
             .then((resp) => {
-                setToken(resp.data)
+                setToken(resp.data.token)
+                setName(resp.data.name)
                 navigate("/MainPage")
             })
             .catch((resp) => {
