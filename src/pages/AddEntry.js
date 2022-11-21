@@ -1,33 +1,61 @@
 import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
+import axios from "axios";
+import { AuthContext } from "../contexts/Auth";
 
 export default function AddEntry() {
-    useNavigate()
+    const navigate = useNavigate()
+
+    let { token } = useContext(AuthContext);
+    console.log(token)
     const [form, setForm] = useState(
         {
-            email: "",
-            password: ""
+            value: "",
+            description: ""
         }
     )
     function handleForm(e) {
         setForm({
             ...form, [e.target.name]: e.target.value
         })
+        console.log(form)
     }
+
+    function postNewEntry(e) {
+        e.preventDefault()
+        /* const config = {
+            headers: {
+                "authorization": `Bearer ${token}`
+            }
+        } */
+
+        axios.post(`http://localhost:5000/AddEntry`, form, {
+            headers: {
+                "authorization": `Bearer ${token}`
+            }
+        })
+            .then((resp) => {
+                console.log(resp.data)
+                navigate("/MainPage")
+            })
+            .catch((resp) => {
+                console.log("deu ruim")
+                console.log(resp.response)
+            })
+
+    }
+
 
     return (
         <BackgroundStyle>
             <Header>
                 <h1>Nova Entrada</h1>
             </Header>
-            <SignInForm>
-                <input required type="text" name="value" placeholder="Valor" onChange={handleForm} value={form.password}></input>
-                <input required type="text" name="description" placeholder="Descrição"></input>
-                <Link to="/MainPage">
-                    <SignInButton type="submit" value="Salvar entrada"></SignInButton>
-                </Link>
+            <SignInForm onSubmit={postNewEntry}>
+                <input required type="number" name="value" placeholder="Valor" onChange={handleForm} value={form.value}></input>
+                <input required type="text" name="description" placeholder="Descrição" onChange={handleForm} value={form.description}></input>
+                <SignInButton type="submit" value="Salvar entrada"></SignInButton>
             </SignInForm>
         </BackgroundStyle>
     )

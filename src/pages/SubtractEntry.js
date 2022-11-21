@@ -1,33 +1,56 @@
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../contexts/Auth";
+import axios from "axios";
 
+export default function SubtractEntry() {
+    const navigate = useNavigate()
 
-export default function AddEntry() {
-    useNavigate()
+    let { token } = useContext (AuthContext);
+    console.log(token)
     const [form, setForm] = useState(
         {
-            email: "",
-            password: ""
+            value: "",
+            description: ""
         }
     )
     function handleForm(e) {
         setForm({
             ...form, [e.target.name]: e.target.value
         })
+        console.log(form)
     }
 
+    function postNewEntry(e) {
+        e.preventDefault()
+
+        axios.post(`http://localhost:5000/SubtractEntry`, form, {
+            headers: {
+                "authorization": `Bearer ${token}`
+            }
+        })
+            .then((resp) => {
+                console.log(resp.data)
+                navigate("/MainPage")
+            })
+            .catch((resp) => {
+                console.log("deu ruim")
+                console.log(resp.response)
+            })
+
+    }
+
+
     return (
-        <BackgroundStyle>
+        <BackgroundStyle onSubmit={postNewEntry}>
             <Header>
                 <h1>Nova Saída</h1>
             </Header>
             <SignInForm>
-                <input required type="text" name="value" placeholder="Valor" onChange={handleForm} value={form.password}></input>
-                <input required type="text" name="description" placeholder="Descrição"></input>
-                <Link to="/MainPage">
+                <input required type="text" name="value" placeholder="Valor" onChange={handleForm} value={form.value}></input>
+                <input required type="text" name="description" placeholder="Descrição" onChange={handleForm} value={form.description}></input>
                     <SignInButton type="submit" value="Salvar saída"></SignInButton>
-                </Link>
             </SignInForm>
         </BackgroundStyle>
     )

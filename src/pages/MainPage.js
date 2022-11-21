@@ -1,44 +1,167 @@
 import styled from "styled-components";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { HiArrowRightOnRectangle, } from 'react-icons/hi2'
 import { AiOutlinePlusCircle, AiOutlineMinusCircle } from "react-icons/ai"
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../contexts/Auth";
 export default function MainPage() {
-    return (
-        <BackgroundStyle>
-            <Header>
-                <h1>Olá, Fulano</h1>
-                <ArrowIcon />
-            </Header>
-            <MainContent>
-                <BalanceParagraph>
-                    <Data>30/11</Data>
-                    <Description> Almoço mãe</Description>
-                    <Value>39.90</Value>
-                </BalanceParagraph>
-                <BalanceParagraph>
-                    <Data>30/11</Data>
-                    <Description> Almoço mãe</Description>
-                    <Value>39.90</Value>
-                </BalanceParagraph>
-            </MainContent>
-            <BelowContent>
-                <Link to="/AddEntry">
-                    <NewEntry>
-                        <PlusArrow />
-                        <p>Nova Entrada</p>
-                    </NewEntry>
-                </Link>
-                <Link to="/SubtractEntry">
-                <NewEntry>
-                    <MinusArrow />
-                    <p>Nova Saída</p>
-                    </NewEntry>
-                </Link>
-            </BelowContent>
-        </BackgroundStyle>
-    )
+    const { token } = useContext(AuthContext)
+    const [balanceArray, setBalanceArray] = useState([])
+    const [total, setTotal] = useState(0)
+    const config = {
+        headers: {
+            "authorization": `Bearer ${token}`
+        }
+    }
+    console.log(balanceArray)
+    function updateBalance(array) {
+        let sum = 0
+        array.forEach(obj => {
+
+            if (obj.type === "deposit") {
+                sum += Number(obj.value)
+            }
+            else {
+                sum -= Number(obj.value)
+            }
+        });
+        return setTotal(sum)
+    }
+
+    useEffect(() => {
+        axios.get(`http://localhost:5000/MainPage`, config)
+            .then((resp) => {
+                setBalanceArray(resp.data)
+                updateBalance(balanceArray)
+            })
+            .catch((resp) => {
+                console.log("deu ruim")
+                console.log(resp.response)
+            })
+    }, [balanceArray])
+
+
+
+
+    if (balanceArray.length === 0) {
+        return (
+            <BackgroundStyle>
+                <Header>
+                    <h1>Olá, Fulano</h1>
+                    <Link to="/">
+                        <ArrowIcon />
+                    </Link>
+                </Header>
+                <MainContent>
+                    <P3>Não há registros de entrada e saída</P3>
+                </MainContent>
+                <BelowContent>
+                    <Link to="/AddEntry">
+                        <NewEntry>
+                            <PlusArrow />
+                            <p>Nova Entrada</p>
+                        </NewEntry>
+                    </Link>
+                    <Link to="/SubtractEntry">
+                        <NewEntry>
+                            <MinusArrow />
+                            <p>Nova Saída</p>
+                        </NewEntry>
+                    </Link>
+                </BelowContent>
+            </BackgroundStyle>
+        )
+    }
+    else {
+
+        return (
+            <BackgroundStyle>
+                <Header>
+                    <h1>Olá, Fulano</h1>
+                    <Link to="/">
+                        <ArrowIcon />
+                    </Link>
+                </Header>
+                <MainContent>
+                    <UpperContainer>
+                        {balanceArray.map((obj) => {
+                            return (
+                                <BalanceParagraph>
+                                    <Positionate>
+                                        <Data>{obj.date}</Data>
+                                        <Description>{obj.description}</Description>
+                                    </Positionate>
+                                    <Value color={obj.type} >{parseFloat(obj.value).toFixed(2)}</Value>
+                                </BalanceParagraph>
+                            )
+                        })}
+                    </UpperContainer>
+                    <TotalBalance>
+                        <p>SALDO</p>
+                        <P2 color={total}>{parseFloat(total).toFixed(2)}</P2>
+                    </TotalBalance>
+                </MainContent>
+                <BelowContent>
+                    <Link to="/AddEntry">
+                        <NewEntry>
+                            <PlusArrow />
+                            <p>Nova Entrada</p>
+                        </NewEntry>
+                    </Link>
+                    <Link to="/SubtractEntry">
+                        <NewEntry>
+                            <MinusArrow />
+                            <p>Nova Saída</p>
+                        </NewEntry>
+                    </Link>
+                </BelowContent>
+            </BackgroundStyle>
+        )
+
+    }
+
 }
 
+const TotalBalance = styled.div`
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 175px;
+    width: 310px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: Raleway;
+    color: #000000;
+    margin-top: 20px;
+`
+const UpperContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow-y: scroll ;
+    margin-bottom: 75px;
+`
+const P3 = styled.p`
+    text-align: center;
+    width: 180px;
+    margin-top: 180px ;
+    align-self: center;
+    font-size: 17px;
+    font-weight: 500;
+    font-family: Raleway;
+    color: #868686;
+`
+
+const P2 = styled.p` 
+    font-size: 17px;
+    font-weight: 500;
+    font-family: Raleway;
+    color:${props => props.color >= 0 ? "#03AC00": "#C70000" } ;
+`
 const Header = styled.header`
 width: 100%;
 box-sizing: border-box;
@@ -63,7 +186,6 @@ margin: 0;h1 {
 color: #FFFFFF;
 }
 `
-
 const BelowContent = styled.div`
     position: fixed;
     bottom: 0;
@@ -77,6 +199,7 @@ const BelowContent = styled.div`
     margin-right: 25px;
 `
 const MainContent = styled.main`
+position: relative;
     display: flex;
     box-sizing: border-box;
     height: 450px;
@@ -90,17 +213,6 @@ const MainContent = styled.main`
     padding-right: 10px;
     align-items: flex-start;
     flex-direction: column;
-`
-const CenterParagraph = styled.p`
-    width: 180px;
-    line-height: 23px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #868686;
-    font-family: Raleway;
-    font-size: 25px;
-    text-align: center;
 `
 const ArrowIcon = styled(HiArrowRightOnRectangle)`
     color: #FFFFFF;
@@ -128,26 +240,6 @@ const BackgroundStyle = styled.main`
     align-items: center;
     padding: 25px;
 `
-const SignInForm = styled.form`
-    color: #000000;
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    input {
-        box-sizing: border-box;
-        width: 330px;
-        height: 60px;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        border: none;
-        font-size: 20px;
-        padding: 10px;
-        font-family: Raleway;
-
-    }
-`
 const NewEntry = styled.div`
     box-sizing: border-box;
     width: 155px;
@@ -169,11 +261,15 @@ const NewEntry = styled.div`
         font-family: Raleway;
     }
 `
+const Positionate = styled.div`
+display: flex;
+flex-direction: row;
+`
 const BalanceParagraph = styled.div`
 display: flex;
 width: 100%;
-align-items: center;
-justify-content: flex-start;
+flex-direction: row;
+justify-content: space-between;
 `
 const Data = styled.p`
     color: #868686;
@@ -187,10 +283,9 @@ const Description = styled.p`
     font-size: 15px;
     font-weight: 400;
     font-family: Raleway;
-    margin-right: 130px;
 `
 const Value = styled.p`
-color: red;
+color: ${props => props.color === "deposit" ? "#03AC00" : "#C70000"};
 font-size: 15px;
 font-weight: 400;
 font-family: Raleway;

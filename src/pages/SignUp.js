@@ -1,15 +1,18 @@
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 
 export default function SignUp() {
-    const navigate  = useNavigate()
+   const navigate = useNavigate()
 
     const [form, setForm] = useState(
         {
+            name: "",
             email: "",
-            password: ""
+            password: "",
+            password_confirmation:""
         }
     )
 
@@ -19,14 +22,28 @@ export default function SignUp() {
         })
     }
 
+    function postSignUp(e) {
+        e.preventDefault();
+
+        axios.post(`http://localhost:5000/sign-up`, form)
+            .then((resp) => {
+                alert("Cadastrado com sucesso")
+                navigate("/")
+            })
+            .catch((resp) => {
+            console.log(resp.response.data)
+        })
+
+    }
+
     return (
         <BackgroundStyle>
             <h1>MyWallet</h1>
-            <SignInForm>
-                <input required type="text" name="name" placeholder="Nome" onChange={handleForm} value={form.password}></input>
-                <input required type="email" name="email" placeholder="E-mail" onChange={handleForm} value={form.password}></input>
-                <input required type="password" name="password" placeholder="Senha"></input>
-                <input required type="password" name="password" placeholder=" Confirme a Senha"></input>
+            <SignInForm onSubmit={postSignUp}>
+                <input required type="text" name="name" placeholder="Nome" onChange={handleForm} value={form.name}></input>
+                <input required type="email" name="email" placeholder="E-mail" onChange={handleForm} value={form.email}></input>
+                <input required type="password" name="password" placeholder="Senha" onChange={handleForm} value={form.password}></input>
+                <input required type="password" name="password_confirmation" placeholder=" Confirme a Senha" onChange={handleForm} value={form.password_confirmation}></input>
                 <SignInButton type="submit" value="Entrar"></SignInButton>
             </SignInForm>
             <Link to="/">

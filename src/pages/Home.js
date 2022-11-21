@@ -1,17 +1,18 @@
 import styled from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-
+import { useContext, useState } from "react";
+import axios from "axios";
+import { AuthContext } from "../contexts/Auth";
 
 export default function Home() {
-    useNavigate()
-
+    const navigate = useNavigate()
     const [form, setForm] = useState(
         {
             email: "",
             password: ""
-        }
-    )
+        })
+    let { setToken } = useContext(AuthContext)
+
 
     function handleForm(e) {
         setForm({
@@ -19,18 +20,31 @@ export default function Home() {
         })
     }
 
+    function postSignIn(e) {
+        e.preventDefault();
+
+        axios.post(`http://localhost:5000/sign-in`, form)
+            .then((resp) => {
+                setToken(resp.data)
+                navigate("/MainPage")
+            })
+            .catch((resp) => {
+                console.log("deu ruim")
+                console.log(resp.response)
+            })
+
+    }
+
     return (
         <BackgroundStyle>
             <h1>MyWallet</h1>
-            <SignInForm>
-                <input required type="email" name="email" placeholder="E-mail" onChange={handleForm} value={form.password}></input>
-                <input required type="password" name="password" placeholder="Senha"></input>
-                <Link to ="/MainPage">
-                    <SignInButton type="submit" value="Entrar"></SignInButton>                
-                </Link>
+            <SignInForm onSubmit={postSignIn}>
+                <input required type="email" name="email" placeholder="E-mail" onChange={handleForm} value={form.email}></input>
+                <input required type="password" name="password" placeholder="Senha" onChange={handleForm} value={form.password}></input>
+                <SignInButton type="submit" value="Entrar"></SignInButton>
             </SignInForm>
 
-            <Link to = "/SignUp">
+            <Link to="/SignUp">
                 <p>Primeira Vez? Cadastre-se!</p>
             </Link>
 
@@ -60,7 +74,6 @@ h1 {
     color: #FFFFFF;
     font-weight: 400;
 }
-
 `
 const SignInForm = styled.form`
     color: #000000;
